@@ -81,10 +81,14 @@ function AreasPage() {
 
   async function remove(id: string) {
     const { error } = await supabase.from("parking_areas").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await qc.invalidateQueries();
     toast.success("Parking area deleted");
   }
+
 
   async function loadDemo() {
     if (!user) return;
