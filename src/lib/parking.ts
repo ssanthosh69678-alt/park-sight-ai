@@ -1,0 +1,96 @@
+export type SlotStatus = "available" | "occupied" | "unknown";
+
+export type ParkingArea = {
+  id: string;
+  user_id: string;
+  area_name: string;
+  location: string;
+  description: string | null;
+  capacity: number;
+  parking_type: string;
+  camera_image_url: string | null;
+  demo_mode: boolean;
+  created_at: string;
+};
+
+export type ParkingSlot = {
+  id: string;
+  area_id: string;
+  slot_number: string;
+  coordinates: { x?: number; y?: number; w?: number; h?: number } | null;
+  status: SlotStatus;
+  updated_at: string;
+};
+
+export type ParkingRecord = {
+  id: string;
+  area_id: string;
+  recorded_at: string;
+  occupied: number;
+  available: number;
+  occupancy_percentage: number;
+  source: string;
+};
+
+export type Prediction = {
+  id: string;
+  area_id: string;
+  prediction_time: string;
+  predicted_occupancy: number;
+  predicted_occupied: number;
+  predicted_available: number;
+  status: AvailabilityLevel;
+  confidence: number | null;
+  model_version: string;
+  is_simulated: boolean;
+};
+
+export type Alert = {
+  id: string;
+  user_id: string;
+  area_id: string | null;
+  alert_type: string;
+  severity: "info" | "warning" | "critical" | string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+export type AvailabilityLevel = "LOW" | "MODERATE" | "HIGH" | "NEARLY FULL";
+
+export const PARKING_TYPES = [
+  { value: "outdoor", label: "Outdoor lot" },
+  { value: "indoor", label: "Indoor garage" },
+  { value: "multilevel", label: "Multi-level" },
+  { value: "street", label: "Street side" },
+  { value: "campus", label: "Campus / institutional" },
+];
+
+export function availabilityLevel(occupancyPct: number): AvailabilityLevel {
+  if (occupancyPct >= 90) return "NEARLY FULL";
+  if (occupancyPct >= 70) return "HIGH";
+  if (occupancyPct >= 40) return "MODERATE";
+  return "LOW";
+}
+
+export function levelTone(level: AvailabilityLevel) {
+  switch (level) {
+    case "NEARLY FULL":
+      return "destructive";
+    case "HIGH":
+      return "warning";
+    case "MODERATE":
+      return "primary";
+    default:
+      return "success";
+  }
+}
+
+export function statusLabel(status: SlotStatus) {
+  return status === "available" ? "Available" : status === "occupied" ? "Occupied" : "Unknown";
+}
+
+export function occupancyPct(occupied: number, capacity: number) {
+  if (!capacity) return 0;
+  return Math.round((occupied / capacity) * 1000) / 10;
+}
