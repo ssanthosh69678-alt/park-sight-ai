@@ -8,7 +8,9 @@ import { SlotGrid, SlotLegend } from "@/components/SlotGrid";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useArea } from "@/lib/area";
-import { SLOT_STATUSES, type SlotStatus } from "@/lib/parking";
+import type { ParkingSlot, SlotStatus } from "@/lib/parking";
+
+const SLOT_STATUSES: SlotStatus[] = ["available", "occupied", "unknown"];
 import { useAreaStatus } from "@/lib/status";
 
 export const Route = createFileRoute("/_authenticated/slots")({
@@ -49,7 +51,7 @@ function SlotsPage() {
         actions={<SlotLegend />}
       />
       <div className="surface-card p-5">
-        <SlotGrid slots={status.slots} onSelect={(s) => cycle(s.id, s.status)} />
+        <SlotGrid slots={status.slots} onSelect={(s: ParkingSlot) => cycle(s.id, s.status)} />
       </div>
       <div className="surface-card p-5">
         <h2 className="font-semibold">Status reference</h2>

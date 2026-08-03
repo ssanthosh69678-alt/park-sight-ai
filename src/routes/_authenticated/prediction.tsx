@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useArea } from "@/lib/area";
-import { trainModel } from "@/lib/demo";
+import { predictOccupancy, trainModel } from "@/lib/demo";
 import { availabilityLevel } from "@/lib/parking";
 import { useAreaStatus } from "@/lib/status";
 
@@ -31,7 +31,22 @@ function PredictionPage() {
   const [day, setDay] = useState(new Date().getDay());
 
   const model = useMemo(() => trainModel(status.records), [status.records]);
-  const predicted = model ? Math.max(0, Math.min(100, Math.round(model.predict(hour, day)))) : null;
+  const target = useMemo(() => {
+    const d = new Date();
+    d.setHours(hour, 0, 0, 0);
+    d.setDate(d.getDate() + ((day - d.getDay() + 7) % 7));
+    return d;
+  }, [hour, day]);
+  const capacityInput = status.configured || area?.capacity || 0;
+  const result =
+    model && capacityInput
+      ? predictOccupancy(model, {
+          date: target,
+          recentOccupancyPct: status.occupancyPct,
+          capacity: capacityInput,
+        })
+      : null;
+  const predicted = result ? Math.round(result.occupancyPct) : null;
 
   if (!area) return <EmptyAreaState />;
 
@@ -70,7 +85,7 @@ function PredictionPage() {
               <p className="text-sm text-muted-foreground">
                 Expected occupancy · about {Math.round((capacity * (100 - predicted)) / 100)} slots free of {capacity}
               </p>
-              <p className="text-sm font-semibold">Availability: {availabilityLevel(predicted)}</p>
+              <p className="text-sm font-semibold">Availability: {result ? result.level : availabilityLevel(predicted)}</p>
               <p className="text-xs text-muted-foreground">
                 Trained on {status.records.length} records · R² {model ? model.r2.toFixed(3) : "—"}
               </p>

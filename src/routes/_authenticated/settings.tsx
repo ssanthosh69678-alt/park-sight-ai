@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -19,8 +20,8 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function SettingsPage() {
-  const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const { theme, toggle } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -34,13 +35,21 @@ function SettingsPage() {
           <Label>Appearance</Label>
           <div className="mt-2 flex gap-2">
             {(["light", "dark"] as const).map((t) => (
-              <Button key={t} size="sm" variant={theme === t ? "default" : "outline"} className="capitalize" onClick={() => setTheme(t)}>
+              <Button
+                key={t}
+                size="sm"
+                variant={theme === t ? "default" : "outline"}
+                className="capitalize"
+                onClick={() => {
+                  if (theme !== t) toggle();
+                }}
+              >
                 {t}
               </Button>
             ))}
           </div>
         </div>
-        <Button variant="destructive" onClick={signOut}>
+        <Button variant="destructive" onClick={() => void supabase.auth.signOut()}>
           Sign out
         </Button>
       </div>
