@@ -48,7 +48,7 @@ export function simulateDetection(slotCount: number, slotNumbers?: string[]): De
 
 /** POST a frame to the self-hosted Flask + YOLO service. */
 export async function runRealDetection(input: {
-  imageBase64?: string;
+  imageBase64?: string | undefined;
   slots?: { slot_number: string; coordinates: unknown }[];
 }): Promise<DetectionResult> {
   const endpoint = getDetectionEndpoint();
