@@ -22,6 +22,8 @@ import { Route as AuthenticatedPredictionRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSlotsRouteImport } from './routes/_authenticated/slots'
+import { Route as ApiPublicDetectionDetectRouteImport } from './routes/api/public/detection/detect'
+import { Route as ApiPublicDetectionHealthRouteImport } from './routes/api/public/detection/health'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +89,18 @@ const AuthenticatedSlotsRoute = AuthenticatedSlotsRouteImport.update({
   path: '/slots',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicDetectionDetectRoute =
+  ApiPublicDetectionDetectRouteImport.update({
+    id: '/api/public/detection/detect',
+    path: '/api/public/detection/detect',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDetectionHealthRoute =
+  ApiPublicDetectionHealthRouteImport.update({
+    id: '/api/public/detection/health',
+    path: '/api/public/detection/health',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +115,8 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/slots': typeof AuthenticatedSlotsRoute
+  '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
+  '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +131,8 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/slots': typeof AuthenticatedSlotsRoute
+  '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
+  '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +149,8 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/slots': typeof AuthenticatedSlotsRoute
+  '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
+  '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +167,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/slots'
+    | '/api/public/detection/detect'
+    | '/api/public/detection/health'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +183,8 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/slots'
+    | '/api/public/detection/detect'
+    | '/api/public/detection/health'
   id:
     | '__root__'
     | '/'
@@ -176,6 +200,8 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/slots'
+    | '/api/public/detection/detect'
+    | '/api/public/detection/health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +210,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicDetectionDetectRoute: typeof ApiPublicDetectionDetectRoute
+  ApiPublicDetectionHealthRoute: typeof ApiPublicDetectionHealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -279,6 +307,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlotsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/detection/detect': {
+      id: '/api/public/detection/detect'
+      path: '/api/public/detection/detect'
+      fullPath: '/api/public/detection/detect'
+      preLoaderRoute: typeof ApiPublicDetectionDetectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/detection/health': {
+      id: '/api/public/detection/health'
+      path: '/api/public/detection/health'
+      fullPath: '/api/public/detection/health'
+      preLoaderRoute: typeof ApiPublicDetectionHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -313,6 +355,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicDetectionDetectRoute: ApiPublicDetectionDetectRoute,
+  ApiPublicDetectionHealthRoute: ApiPublicDetectionHealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
