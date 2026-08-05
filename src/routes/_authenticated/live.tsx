@@ -177,6 +177,8 @@ function LivePage() {
       );
 
       await qc.invalidateQueries();
+      await refreshApiStatus();
+
       toast.success(
         `${result.simulated ? "Simulated" : "YOLO"} frame — ${result.occupied} occupied, ${result.available} free (${result.inference_ms} ms)`,
       );
