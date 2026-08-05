@@ -48,9 +48,14 @@ function LivePage() {
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<DetectionMode>("demo");
   const [last, setLast] = useState<DetectionResult | null>(null);
+  const [session, setSession] = useState<FlaskCameraSession | null>(null);
+  const [apiStatus, setApiStatus] = useState<FlaskStatus | null>(null);
 
   const runDetection = useServerFn(detectFrame);
   const fetchHealth = useServerFn(getPipelineHealth);
+  const startSession = useServerFn(startCameraSession);
+  const stopSession = useServerFn(stopCameraSession);
+  const fetchStatus = useServerFn(getParkingStatus);
   const health = useQuery({ queryKey: ["pipeline-health"], queryFn: () => fetchHealth({}) });
 
   useEffect(() => {
@@ -68,11 +73,33 @@ function LivePage() {
     }
   }
 
+  /** Asks the Flask API for the authoritative occupancy summary of this area. */
+  async function refreshApiStatus() {
+    if (!area) return;
+    const result = await fetchStatus({
+      data: {
+        areaId: area.id,
+        capacity: status.configured || area.capacity,
+        slots: status.slots.map((s) => ({ slot_number: s.slot_number, status: s.status })),
+      },
+    });
+    setApiStatus(result.online ? result.data : null);
+  }
+
   async function toggle() {
+    if (!area) return;
     if (on) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       setOn(false);
+      const stopped = await stopSession({ data: { areaId: area.id } });
+      if (stopped.online) {
+        setSession(stopped.data);
+        toast.success(`Camera session closed after ${stopped.data.duration_seconds ?? 0}s`);
+      } else {
+        setSession(null);
+      }
+      await refreshApiStatus();
       return;
     }
     try {
@@ -80,10 +107,19 @@ function LivePage() {
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
       setOn(true);
+      const started = await startSession({ data: { areaId: area.id, source: "browser" } });
+      if (started.online) {
+        setSession(started.data);
+        toast.success(`Camera session ${started.data.session_id.slice(0, 8)} streaming`);
+      } else {
+        setSession(null);
+      }
+      await refreshApiStatus();
     } catch {
       toast.error("Camera permission denied or unavailable");
     }
   }
+
 
   /** Grabs the current video frame as a JPEG data URL for the YOLO pipeline. */
   function grabFrame(): string | undefined {
