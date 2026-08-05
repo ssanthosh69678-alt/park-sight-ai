@@ -89,10 +89,27 @@ function PredictionPage() {
             <Label htmlFor="day">Day of week (0 = Sunday)</Label>
             <Input id="day" type="number" min={0} max={6} value={day} onChange={(e) => setDay(Number(e.target.value))} />
           </div>
-          <Button className="w-full" disabled>
-            <Brain className="mr-2 size-4" /> Model updates live
+          <div className="space-y-2">
+            <Label htmlFor="horizon">Forecast horizon (hours)</Label>
+            <Input
+              id="horizon"
+              type="number"
+              min={1}
+              max={24}
+              value={horizon}
+              onChange={(e) => setHorizon(Math.min(24, Math.max(1, Number(e.target.value))))}
+            />
+          </div>
+          <Button className="w-full" onClick={() => api.refetch()} disabled={api.isFetching}>
+            <Brain className="mr-2 size-4" /> {api.isFetching ? "Running model…" : "Run REST forecast"}
           </Button>
+          <p className="text-xs text-muted-foreground">
+            {remote
+              ? `scikit-learn RandomForest · R² ${remote.r2}% on ${remote.samples} samples`
+              : `In-browser regression · ${api.data && !api.data.online ? api.data.error : "Flask /api/predict not connected"}`}
+          </p>
         </div>
+
         <div className="surface-card p-5">
           <h2 className="font-semibold">Forecast</h2>
           {predicted === null ? (
