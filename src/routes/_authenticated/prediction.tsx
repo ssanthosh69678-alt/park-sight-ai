@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Brain } from "lucide-react";
 
 import { EmptyAreaState } from "@/components/EmptyAreaState";
@@ -8,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useArea } from "@/lib/area";
+import { getOccupancyForecast } from "@/lib/api.functions";
 import { predictOccupancy, trainModel } from "@/lib/demo";
 import { availabilityLevel } from "@/lib/parking";
 import { useAreaStatus } from "@/lib/status";
+
 
 export const Route = createFileRoute("/_authenticated/prediction")({
   head: () => ({
