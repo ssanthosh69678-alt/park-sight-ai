@@ -271,7 +271,36 @@ function LivePage() {
           </p>
         )}
 
+        {(session || apiStatus) && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <PipelineStat
+              label="Camera session"
+              value={
+                session
+                  ? `${session.status} · ${session.session_id.slice(0, 8)}`
+                  : "no REST session"
+              }
+              tone={session?.status === "streaming" ? "ok" : "muted"}
+            />
+            <PipelineStat
+              label="REST occupancy"
+              value={
+                apiStatus
+                  ? `${apiStatus.occupied}/${apiStatus.capacity} · ${apiStatus.occupancy_percentage}%`
+                  : "—"
+              }
+              tone={apiStatus ? "ok" : "muted"}
+            />
+            <PipelineStat
+              label="Availability (API)"
+              value={apiStatus?.availability_level ?? "—"}
+              tone={apiStatus?.availability_level === "full" ? "bad" : apiStatus ? "ok" : "muted"}
+            />
+          </div>
+        )}
+
         {last && (
+
           <p className="mt-3 text-xs text-muted-foreground">
             Last run · {last.model} · {last.inference_ms} ms · {last.boxes.length} boxes ·{" "}
             {last.simulated ? "DEMO / SIMULATED DATA" : "real inference"}
