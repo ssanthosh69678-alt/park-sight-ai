@@ -1,4 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getParkingAnalytics } from "@/lib/api.functions";
+
 import {
   Bar,
   BarChart,
@@ -32,24 +36,43 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 function AnalyticsPage() {
   const { area } = useArea();
   const status = useAreaStatus(area);
+  const fetchAnalytics = useServerFn(getParkingAnalytics);
+
+  const records = status.records.map((r) => ({
+    recorded_at: r.recorded_at,
+    occupancy_percentage: r.occupancy_percentage,
+  }));
+
+  const api = useQuery({
+    queryKey: ["flask-analytics", area?.id, records.length],
+    enabled: !!area && records.length > 0,
+    queryFn: () => fetchAnalytics({ data: { areaId: area!.id, records } }),
+  });
+  const remote = api.data?.online ? api.data.data : null;
+
   if (!area) return <EmptyAreaState />;
 
   const values = status.records.map((r) => r.occupancy_percentage);
   const stats = [
-    ["Mean", mean(values)],
-    ["Median", median(values)],
-    ["Mode", mode(values)],
-    ["Variance", variance(values)],
-    ["Std deviation", stdDev(values)],
-    ["Samples", values.length],
+    ["Mean", remote?.mean ?? mean(values)],
+    ["Median", remote?.median ?? median(values)],
+    ["Mode", remote?.mode ?? mode(values)],
+    ["Variance", remote?.variance ?? variance(values)],
+    ["Std deviation", remote?.std_dev ?? stdDev(values)],
+    ["Samples", remote?.samples ?? values.length],
   ] as const;
 
   const hourly = Array.from({ length: 24 }, (_, h) => {
+    const fromApi = remote?.hourly.find((p) => p.hour === h);
+    if (fromApi) return { hour: `${h}:00`, occupancy: Math.round(fromApi.occupancy) };
     const v = status.records.filter((r) => new Date(r.recorded_at).getHours() === h).map((r) => r.occupancy_percentage);
     return { hour: `${h}:00`, occupancy: Math.round(mean(v)) };
   });
 
   const daily = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, i) => {
+    // Flask (pandas) reports Monday = 0; the UI axis starts on Sunday.
+    const fromApi = remote?.daily.find((p) => p.day === (i + 6) % 7);
+    if (fromApi) return { day: d, occupancy: Math.round(fromApi.occupancy) };
     const v = status.records.filter((r) => new Date(r.recorded_at).getDay() === i).map((r) => r.occupancy_percentage);
     return { day: d, occupancy: Math.round(mean(v)) };
   });
@@ -58,7 +81,17 @@ function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Analytics" description={`Statistical analysis of ${values.length} occupancy records for ${area.area_name}.`} />
+      <PageHeader
+        title="Analytics"
+        description={`Statistical analysis of ${values.length} occupancy records for ${area.area_name}.`}
+      />
+
+      <p className="text-xs text-muted-foreground">
+        {remote
+          ? `Computed by the Flask REST API (${remote.engine}) · peak hour ${remote.peak_hour}:00 · quietest ${remote.quietest_hour}:00`
+          : `Computed in-app · ${api.data && !api.data.online ? api.data.error : "Flask analytics endpoint not connected"}`}
+      </p>
+
 
       <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6">
         {stats.map(([label, value]) => (

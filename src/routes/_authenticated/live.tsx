@@ -12,6 +12,8 @@ import { SlotGrid, SlotLegend } from "@/components/SlotGrid";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useArea } from "@/lib/area";
+import type { FlaskCameraSession, FlaskStatus } from "@/lib/api";
+import { getParkingStatus, startCameraSession, stopCameraSession } from "@/lib/api.functions";
 import { detectFrame, getPipelineHealth } from "@/lib/detection.functions";
 import {
   DETECTION_MODES,
@@ -22,6 +24,7 @@ import {
 import { occupancyPct } from "@/lib/parking";
 import { useAreaStatus } from "@/lib/status";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/live")({
   head: () => ({
@@ -45,9 +48,14 @@ function LivePage() {
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<DetectionMode>("demo");
   const [last, setLast] = useState<DetectionResult | null>(null);
+  const [session, setSession] = useState<FlaskCameraSession | null>(null);
+  const [apiStatus, setApiStatus] = useState<FlaskStatus | null>(null);
 
   const runDetection = useServerFn(detectFrame);
   const fetchHealth = useServerFn(getPipelineHealth);
+  const startSession = useServerFn(startCameraSession);
+  const stopSession = useServerFn(stopCameraSession);
+  const fetchStatus = useServerFn(getParkingStatus);
   const health = useQuery({ queryKey: ["pipeline-health"], queryFn: () => fetchHealth({}) });
 
   useEffect(() => {
@@ -65,11 +73,33 @@ function LivePage() {
     }
   }
 
+  /** Asks the Flask API for the authoritative occupancy summary of this area. */
+  async function refreshApiStatus() {
+    if (!area) return;
+    const result = await fetchStatus({
+      data: {
+        areaId: area.id,
+        capacity: status.configured || area.capacity,
+        slots: status.slots.map((s) => ({ slot_number: s.slot_number, status: s.status })),
+      },
+    });
+    setApiStatus(result.online ? result.data : null);
+  }
+
   async function toggle() {
+    if (!area) return;
     if (on) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       setOn(false);
+      const stopped = await stopSession({ data: { areaId: area.id } });
+      if (stopped.online) {
+        setSession(stopped.data);
+        toast.success(`Camera session closed after ${stopped.data.duration_seconds ?? 0}s`);
+      } else {
+        setSession(null);
+      }
+      await refreshApiStatus();
       return;
     }
     try {
@@ -77,10 +107,19 @@ function LivePage() {
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
       setOn(true);
+      const started = await startSession({ data: { areaId: area.id, source: "browser" } });
+      if (started.online) {
+        setSession(started.data);
+        toast.success(`Camera session ${started.data.session_id.slice(0, 8)} streaming`);
+      } else {
+        setSession(null);
+      }
+      await refreshApiStatus();
     } catch {
       toast.error("Camera permission denied or unavailable");
     }
   }
+
 
   /** Grabs the current video frame as a JPEG data URL for the YOLO pipeline. */
   function grabFrame(): string | undefined {
@@ -138,6 +177,8 @@ function LivePage() {
       );
 
       await qc.invalidateQueries();
+      await refreshApiStatus();
+
       toast.success(
         `${result.simulated ? "Simulated" : "YOLO"} frame — ${result.occupied} occupied, ${result.available} free (${result.inference_ms} ms)`,
       );
@@ -230,7 +271,36 @@ function LivePage() {
           </p>
         )}
 
+        {(session || apiStatus) && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <PipelineStat
+              label="Camera session"
+              value={
+                session
+                  ? `${session.status} · ${session.session_id.slice(0, 8)}`
+                  : "no REST session"
+              }
+              tone={session?.status === "streaming" ? "ok" : "muted"}
+            />
+            <PipelineStat
+              label="REST occupancy"
+              value={
+                apiStatus
+                  ? `${apiStatus.occupied}/${apiStatus.capacity} · ${apiStatus.occupancy_percentage}%`
+                  : "—"
+              }
+              tone={apiStatus ? "ok" : "muted"}
+            />
+            <PipelineStat
+              label="Availability (API)"
+              value={apiStatus?.availability_level ?? "—"}
+              tone={apiStatus?.availability_level === "full" ? "bad" : apiStatus ? "ok" : "muted"}
+            />
+          </div>
+        )}
+
         {last && (
+
           <p className="mt-3 text-xs text-muted-foreground">
             Last run · {last.model} · {last.inference_ms} ms · {last.boxes.length} boxes ·{" "}
             {last.simulated ? "DEMO / SIMULATED DATA" : "real inference"}
