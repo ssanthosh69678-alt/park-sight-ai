@@ -33,6 +33,22 @@ function PredictionPage() {
   const status = useAreaStatus(area);
   const [hour, setHour] = useState(new Date().getHours());
   const [day, setDay] = useState(new Date().getDay());
+  const [horizon, setHorizon] = useState(6);
+
+  const fetchForecast = useServerFn(getOccupancyForecast);
+  const history = status.records.map((r) => ({
+    recorded_at: r.recorded_at,
+    occupancy_percentage: r.occupancy_percentage,
+  }));
+  const api = useQuery({
+    queryKey: ["flask-forecast", area?.id, horizon, history.length],
+    enabled: !!area && history.length >= 24,
+    queryFn: () =>
+      fetchForecast({ data: { areaId: area!.id, history, horizonHours: horizon } }),
+  });
+  const remote = api.data?.online ? api.data.data : null;
+
+
 
   const model = useMemo(() => trainModel(status.records), [status.records]);
   const target = useMemo(() => {
