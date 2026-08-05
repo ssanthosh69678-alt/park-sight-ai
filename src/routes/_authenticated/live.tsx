@@ -12,6 +12,8 @@ import { SlotGrid, SlotLegend } from "@/components/SlotGrid";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useArea } from "@/lib/area";
+import type { FlaskCameraSession, FlaskStatus } from "@/lib/api";
+import { getParkingStatus, startCameraSession, stopCameraSession } from "@/lib/api.functions";
 import { detectFrame, getPipelineHealth } from "@/lib/detection.functions";
 import {
   DETECTION_MODES,
@@ -22,6 +24,7 @@ import {
 import { occupancyPct } from "@/lib/parking";
 import { useAreaStatus } from "@/lib/status";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/live")({
   head: () => ({
