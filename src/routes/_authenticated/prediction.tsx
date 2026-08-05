@@ -126,9 +126,25 @@ function PredictionPage() {
               <p className="text-xs text-muted-foreground">
                 Trained on {status.records.length} records · R² {model ? model.r2.toFixed(3) : "—"}
               </p>
+              {remote && (
+                <div className="mt-4 space-y-1 border-t border-border pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    REST forecast · next {remote.predictions.length}h
+                  </p>
+                  {remote.predictions.map((p) => (
+                    <div key={p.prediction_time} className="flex justify-between text-sm tabular-nums">
+                      <span className="text-muted-foreground">
+                        {new Date(p.prediction_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <span className="font-medium">{p.predicted_occupancy}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
