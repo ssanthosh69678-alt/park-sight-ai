@@ -24,7 +24,12 @@ Expose it publicly (e.g. `ngrok http 5000`) and set these backend secrets in the
 | --- | --- | --- |
 | GET | `/api/health` | Readiness + loaded YOLO model |
 | POST | `/api/detect` | `{image, slots}` → occupancy + per-slot boxes |
-| POST | `/api/predict` | `{history, horizon_hours}` → RandomForest forecast |
+| POST | `/api/status` | `{area_id, capacity, slots}` → live occupancy summary |
+| POST | `/api/analytics` | `{area_id, records}` → pandas mean/median/mode/variance/std + hourly & daily curves |
+| POST | `/api/predict` | `{area_id, history, horizon_hours}` → RandomForest forecast |
+| POST | `/api/camera/start` | `{area_id, source}` → camera session (`session_id`, `started_at`) |
+| POST | `/api/camera/stop` | `{area_id}` → closed session with `duration_seconds` |
+| GET | `/api/camera/sessions` | Active camera sessions |
 
 ## App-side pipeline routes
 
