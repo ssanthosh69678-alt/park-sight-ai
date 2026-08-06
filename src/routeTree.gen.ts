@@ -16,8 +16,11 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAreasRouteImport } from './routes/_authenticated/areas'
+import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/live'
+import { Route as AuthenticatedMyBookingsRouteImport } from './routes/_authenticated/my-bookings'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedPredictionRouteImport } from './routes/_authenticated/prediction'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
@@ -61,6 +64,11 @@ const AuthenticatedAreasRoute = AuthenticatedAreasRouteImport.update({
   path: '/areas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBookingsRoute = AuthenticatedBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -69,6 +77,16 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthenticatedLiveRoute = AuthenticatedLiveRouteImport.update({
   id: '/live',
   path: '/live',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMyBookingsRoute = AuthenticatedMyBookingsRouteImport.update({
+  id: '/my-bookings',
+  path: '/my-bookings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPredictionRoute = AuthenticatedPredictionRouteImport.update({
@@ -121,8 +139,11 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/areas': typeof AuthenticatedAreasRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/live': typeof AuthenticatedLiveRoute
+  '/my-bookings': typeof AuthenticatedMyBookingsRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/prediction': typeof AuthenticatedPredictionRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -139,8 +160,11 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/areas': typeof AuthenticatedAreasRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/live': typeof AuthenticatedLiveRoute
+  '/my-bookings': typeof AuthenticatedMyBookingsRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/prediction': typeof AuthenticatedPredictionRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -159,8 +183,11 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/areas': typeof AuthenticatedAreasRoute
+  '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/live': typeof AuthenticatedLiveRoute
+  '/_authenticated/my-bookings': typeof AuthenticatedMyBookingsRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/prediction': typeof AuthenticatedPredictionRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
@@ -179,8 +206,11 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/analytics'
     | '/areas'
+    | '/bookings'
     | '/dashboard'
     | '/live'
+    | '/my-bookings'
+    | '/payments'
     | '/prediction'
     | '/reports'
     | '/search'
@@ -197,8 +227,11 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/analytics'
     | '/areas'
+    | '/bookings'
     | '/dashboard'
     | '/live'
+    | '/my-bookings'
+    | '/payments'
     | '/prediction'
     | '/reports'
     | '/search'
@@ -216,8 +249,11 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/analytics'
     | '/_authenticated/areas'
+    | '/_authenticated/bookings'
     | '/_authenticated/dashboard'
     | '/_authenticated/live'
+    | '/_authenticated/my-bookings'
+    | '/_authenticated/payments'
     | '/_authenticated/prediction'
     | '/_authenticated/reports'
     | '/_authenticated/search'
@@ -289,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAreasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bookings': {
+      id: '/_authenticated/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof AuthenticatedBookingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -301,6 +344,20 @@ declare module '@tanstack/react-router' {
       path: '/live'
       fullPath: '/live'
       preLoaderRoute: typeof AuthenticatedLiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-bookings': {
+      id: '/_authenticated/my-bookings'
+      path: '/my-bookings'
+      fullPath: '/my-bookings'
+      preLoaderRoute: typeof AuthenticatedMyBookingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/prediction': {
@@ -365,8 +422,11 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedAreasRoute: typeof AuthenticatedAreasRoute
+  AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
+  AuthenticatedMyBookingsRoute: typeof AuthenticatedMyBookingsRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedPredictionRoute: typeof AuthenticatedPredictionRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
@@ -378,8 +438,11 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedAreasRoute: AuthenticatedAreasRoute,
+  AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLiveRoute: AuthenticatedLiveRoute,
+  AuthenticatedMyBookingsRoute: AuthenticatedMyBookingsRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedPredictionRoute: AuthenticatedPredictionRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
