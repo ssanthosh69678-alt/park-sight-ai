@@ -127,9 +127,23 @@ function GoogleButton() {
   );
 }
 
+async function routeForCurrentUser() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return "/dashboard" as const;
+  const { data: row } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", data.user.id)
+    .limit(1)
+    .maybeSingle();
+  return row?.role === "customer" ? ("/search" as const) : ("/dashboard" as const);
+}
+
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
@@ -137,13 +151,17 @@ function LoginForm() {
     e.preventDefault();
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setBusy(false);
     if (error) {
+      setBusy(false);
       toast.error(error.message);
       return;
     }
+    if (remember) window.localStorage.setItem("parksight-remember-email", email.trim());
+    else window.localStorage.removeItem("parksight-remember-email");
+    const to = await routeForCurrentUser();
+    setBusy(false);
     toast.success("Welcome back");
-    navigate({ to: "/dashboard" });
+    navigate({ to });
   }
 
   return (
@@ -159,14 +177,34 @@ function LoginForm() {
             Forgot password?
           </Link>
         </div>
-        <Input
-          id="login-password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <Input
+            id="login-password"
+            type={show ? "text" : "password"}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            aria-label={show ? "Hide password" : "Show password"}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+          >
+            {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
       </div>
+      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="size-4 accent-[var(--primary)]"
+        />
+        Remember me
+      </label>
       <Button type="submit" className="w-full" disabled={busy}>
         {busy && <Loader2 className="mr-2 size-4 animate-spin" />} Login
       </Button>
@@ -175,8 +213,16 @@ function LoginForm() {
 }
 
 function SignupForm({ onDone }: { onDone: () => void }) {
-  const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirm: "",
+    role: "customer" as "customer" | "owner",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -200,7 +246,11 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       password: parsed.data.password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: parsed.data.fullName, phone: parsed.data.phone },
+        data: {
+          full_name: parsed.data.fullName,
+          phone: parsed.data.phone,
+          role: parsed.data.role,
+        },
       },
     });
     setBusy(false);
@@ -231,6 +281,33 @@ function SignupForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} className="mt-6 space-y-4">
       <div className="space-y-2">
+        <Label>I am a</Label>
+        <div className="grid grid-cols-2 gap-3">
+          {(
+            [
+              { value: "customer", label: "Customer", hint: "Find & book parking", icon: Car },
+              { value: "owner", label: "Parking Owner", hint: "Manage my parking", icon: Building2 },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => set("role", opt.value)}
+              className={
+                "rounded-xl border p-3 text-left transition-colors " +
+                (form.role === opt.value
+                  ? "border-primary bg-primary/10"
+                  : "hover:border-primary/40 hover:bg-accent/50")
+              }
+            >
+              <opt.icon className="mb-1.5 size-4 text-primary" />
+              <span className="block text-sm font-semibold">{opt.label}</span>
+              <span className="block text-xs text-muted-foreground">{opt.hint}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
         <Input id="name" value={form.fullName} onChange={(e) => set("fullName", e.target.value)} />
         {errors["fullName"] && <p className="text-xs text-destructive">{errors["fullName"]}</p>}
@@ -248,19 +325,30 @@ function SignupForm({ onDone }: { onDone: () => void }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={form.password}
-            onChange={(e) => set("password", e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={show ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => set("password", e.target.value)}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShow((s) => !s)}
+              aria-label={show ? "Hide password" : "Show password"}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+            >
+              {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
           {errors["password"] && <p className="text-xs text-destructive">{errors["password"]}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>
           <Input
             id="confirm"
-            type="password"
+            type={show ? "text" : "password"}
             value={form.confirm}
             onChange={(e) => set("confirm", e.target.value)}
           />
@@ -276,3 +364,4 @@ function SignupForm({ onDone }: { onDone: () => void }) {
     </form>
   );
 }
+
