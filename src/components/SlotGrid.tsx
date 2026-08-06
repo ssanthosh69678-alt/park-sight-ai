@@ -65,7 +65,7 @@ export function SlotGrid({
         >
           <span className="tabular-nums">{slot.slot_number}</span>
           <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">
-            {slot.status === "available" ? "free" : slot.status === "occupied" ? "busy" : "?"}
+            {shortLabel[slot.status]}
           </span>
         </button>
       ))}
