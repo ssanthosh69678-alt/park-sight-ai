@@ -28,7 +28,9 @@ export function useAreas(userId: string | undefined) {
       const { data, error } = await supabase
         .from("parking_areas")
         .select("*")
+        .eq("user_id", userId!)
         .order("created_at", { ascending: true });
+
       if (error) throw error;
       return (data ?? []) as unknown as ParkingArea[];
     },

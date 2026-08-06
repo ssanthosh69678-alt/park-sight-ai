@@ -5,13 +5,28 @@ export type ParkingArea = {
   user_id: string;
   area_name: string;
   location: string;
+  address: string;
   description: string | null;
   capacity: number;
   parking_type: string;
   camera_image_url: string | null;
   demo_mode: boolean;
   created_at: string;
+  latitude: number | null;
+  longitude: number | null;
+  opening_time: string;
+  closing_time: string;
+  vehicle_types: string[];
+  price_bike: number;
+  price_car: number;
+  price_suv: number;
+  price_truck: number;
+  price_hourly: number;
+  price_daily: number;
+  rating: number;
+  is_active: boolean;
 };
+
 
 export type ParkingSlot = {
   id: string;
