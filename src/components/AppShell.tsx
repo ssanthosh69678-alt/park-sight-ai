@@ -12,6 +12,9 @@ import {
   Menu,
   Moon,
   Search,
+  Search as SearchIcon,
+  Ticket,
+  Wallet,
   Settings,
   Sun,
   User,
@@ -37,26 +40,49 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAlerts, useProfile } from "@/lib/data";
 import { useArea } from "@/lib/area";
+import { useRole } from "@/lib/roles";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
-export const NAV_ITEMS = [
+export const OWNER_NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/live", label: "Live Monitor", icon: Camera },
+  { to: "/live", label: "Camera Monitoring", icon: Camera },
   { to: "/areas", label: "Parking Areas", icon: MapPin },
-  { to: "/slots", label: "Slot Management", icon: Grid3x3 },
+  { to: "/slots", label: "Parking Slots", icon: Grid3x3 },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/bookings", label: "Bookings", icon: Ticket },
+  { to: "/payments", label: "Payments", icon: Wallet },
   { to: "/prediction", label: "ML Prediction", icon: Brain },
   { to: "/reports", label: "Reports", icon: FileText },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
+export const CUSTOMER_NAV = [
+  { to: "/search", label: "Find Parking", icon: SearchIcon },
+  { to: "/my-bookings", label: "My Bookings", icon: Ticket },
+  { to: "/settings", label: "Settings", icon: Settings },
+] as const;
+
+/** Kept for backwards compatibility with existing imports. */
+export const NAV_ITEMS = OWNER_NAV;
+
+function useNavItems() {
+  const { isCustomer } = useRole();
+  return (isCustomer ? CUSTOMER_NAV : OWNER_NAV) as readonly {
+    to: string;
+    label: string;
+    icon: typeof LayoutDashboard;
+  }[];
+}
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const items = useNavItems();
+
   return (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const active = pathname === item.to;
         return (
           <Link

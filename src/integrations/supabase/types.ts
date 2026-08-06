@@ -55,6 +55,78 @@ export type Database = {
           },
         ]
       }
+      bookings: {
+        Row: {
+          amount: number
+          area_id: string
+          booking_ref: string
+          created_at: string
+          customer_id: string
+          end_time: string
+          hours: number
+          id: string
+          notes: string | null
+          payment_status: string
+          slot_id: string | null
+          start_time: string
+          status: string
+          updated_at: string
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Insert: {
+          amount?: number
+          area_id: string
+          booking_ref?: string
+          created_at?: string
+          customer_id: string
+          end_time: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          slot_id?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+          vehicle_number?: string
+          vehicle_type?: string
+        }
+        Update: {
+          amount?: number
+          area_id?: string
+          booking_ref?: string
+          created_at?: string
+          customer_id?: string
+          end_time?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          slot_id?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+          vehicle_number?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "parking_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "parking_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       camera_sessions: {
         Row: {
           area_id: string
@@ -90,45 +162,146 @@ export type Database = {
           },
         ]
       }
+      favorites: {
+        Row: {
+          area_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          area_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          area_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "parking_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       parking_areas: {
         Row: {
+          address: string
           area_name: string
           camera_image_url: string | null
           capacity: number
+          closing_time: string
           created_at: string
           demo_mode: boolean
           description: string | null
           id: string
+          is_active: boolean
+          latitude: number | null
           location: string
+          longitude: number | null
+          opening_time: string
           parking_type: string
+          price_bike: number
+          price_car: number
+          price_daily: number
+          price_hourly: number
+          price_suv: number
+          price_truck: number
+          rating: number
           updated_at: string
           user_id: string
+          vehicle_types: string[]
         }
         Insert: {
+          address?: string
           area_name: string
           camera_image_url?: string | null
           capacity?: number
+          closing_time?: string
           created_at?: string
           demo_mode?: boolean
           description?: string | null
           id?: string
+          is_active?: boolean
+          latitude?: number | null
           location?: string
+          longitude?: number | null
+          opening_time?: string
           parking_type?: string
+          price_bike?: number
+          price_car?: number
+          price_daily?: number
+          price_hourly?: number
+          price_suv?: number
+          price_truck?: number
+          rating?: number
           updated_at?: string
           user_id: string
+          vehicle_types?: string[]
         }
         Update: {
+          address?: string
           area_name?: string
           camera_image_url?: string | null
           capacity?: number
+          closing_time?: string
           created_at?: string
           demo_mode?: boolean
           description?: string | null
           id?: string
+          is_active?: boolean
+          latitude?: number | null
           location?: string
+          longitude?: number | null
+          opening_time?: string
           parking_type?: string
+          price_bike?: number
+          price_car?: number
+          price_daily?: number
+          price_hourly?: number
+          price_suv?: number
+          price_truck?: number
+          rating?: number
           updated_at?: string
           user_id?: string
+          vehicle_types?: string[]
         }
         Relationships: []
       }
@@ -179,6 +352,7 @@ export type Database = {
           slot_number: string
           status: string
           updated_at: string
+          vehicle_type: string
         }
         Insert: {
           area_id: string
@@ -188,6 +362,7 @@ export type Database = {
           slot_number: string
           status?: string
           updated_at?: string
+          vehicle_type?: string
         }
         Update: {
           area_id?: string
@@ -197,6 +372,7 @@ export type Database = {
           slot_number?: string
           status?: string
           updated_at?: string
+          vehicle_type?: string
         }
         Relationships: [
           {
@@ -204,6 +380,66 @@ export type Database = {
             columns: ["area_id"]
             isOneToOne: false
             referencedRelation: "parking_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          area_id: string
+          booking_id: string
+          created_at: string
+          currency: string
+          customer_id: string
+          id: string
+          method: string
+          paid_at: string | null
+          receipt_no: string
+          status: string
+          transaction_ref: string
+        }
+        Insert: {
+          amount?: number
+          area_id: string
+          booking_id: string
+          created_at?: string
+          currency?: string
+          customer_id: string
+          id?: string
+          method?: string
+          paid_at?: string | null
+          receipt_no?: string
+          status?: string
+          transaction_ref?: string
+        }
+        Update: {
+          amount?: number
+          area_id?: string
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          id?: string
+          method?: string
+          paid_at?: string | null
+          receipt_no?: string
+          status?: string
+          transaction_ref?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "parking_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -285,15 +521,100 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vehicle_detections: {
+        Row: {
+          area_id: string
+          bbox: Json
+          confidence: number
+          detected_at: string
+          id: string
+          is_simulated: boolean
+          session_id: string | null
+          slot_id: string | null
+          vehicle_class: string
+        }
+        Insert: {
+          area_id: string
+          bbox?: Json
+          confidence?: number
+          detected_at?: string
+          id?: string
+          is_simulated?: boolean
+          session_id?: string | null
+          slot_id?: string | null
+          vehicle_class?: string
+        }
+        Update: {
+          area_id?: string
+          bbox?: Json
+          confidence?: number
+          detected_at?: string
+          id?: string
+          is_simulated?: boolean
+          session_id?: string | null
+          slot_id?: string | null
+          vehicle_class?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_detections_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "parking_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_detections_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "camera_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_detections_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "parking_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "owner" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -420,6 +741,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["owner", "customer"],
+    },
   },
 } as const
