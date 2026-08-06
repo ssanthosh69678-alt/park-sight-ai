@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Building2, Car, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -37,8 +37,10 @@ const signupSchema = z
     phone: z.string().trim().min(6, "Enter a valid phone number").max(20),
     password: z.string().min(8, "Password must be at least 8 characters").max(72),
     confirm: z.string(),
+    role: z.enum(["customer", "owner"]),
   })
   .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "Passwords do not match" });
+
 
 function AuthPage() {
   const { mode } = Route.useSearch();
