@@ -12,6 +12,9 @@ import {
   Menu,
   Moon,
   Search,
+  Search as SearchIcon,
+  Ticket,
+  Wallet,
   Settings,
   Sun,
   User,
@@ -37,6 +40,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useAlerts, useProfile } from "@/lib/data";
 import { useArea } from "@/lib/area";
+import { useRole } from "@/lib/roles";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -78,7 +82,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => {
+      {items.map((item) => {
         const active = pathname === item.to;
         return (
           <Link
