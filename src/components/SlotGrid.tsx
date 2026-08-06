@@ -4,7 +4,17 @@ import type { ParkingSlot, SlotStatus } from "@/lib/parking";
 const statusStyles: Record<SlotStatus, string> = {
   available: "border-success/40 bg-success/12 text-success hover:bg-success/20",
   occupied: "border-destructive/40 bg-destructive/12 text-destructive hover:bg-destructive/20",
+  reserved: "border-primary/40 bg-primary/12 text-primary hover:bg-primary/20",
+  offline: "border-border bg-muted text-muted-foreground hover:bg-muted/80",
   unknown: "border-warning/40 bg-warning/12 text-warning hover:bg-warning/20",
+};
+
+const shortLabel: Record<SlotStatus, string> = {
+  available: "free",
+  occupied: "busy",
+  reserved: "held",
+  offline: "off",
+  unknown: "?",
 };
 
 export function SlotLegend() {
@@ -17,11 +27,18 @@ export function SlotLegend() {
         <span className="size-2.5 rounded-full bg-destructive" /> Occupied
       </span>
       <span className="flex items-center gap-1.5">
+        <span className="size-2.5 rounded-full bg-primary" /> Reserved
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="size-2.5 rounded-full bg-muted-foreground" /> Offline
+      </span>
+      <span className="flex items-center gap-1.5">
         <span className="size-2.5 rounded-full bg-warning" /> Unknown / processing
       </span>
     </div>
   );
 }
+
 
 export function SlotGrid({
   slots,
