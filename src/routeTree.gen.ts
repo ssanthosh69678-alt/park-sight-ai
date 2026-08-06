@@ -20,8 +20,10 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedLiveRouteImport } from './routes/_authenticated/live'
 import { Route as AuthenticatedPredictionRouteImport } from './routes/_authenticated/prediction'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSlotsRouteImport } from './routes/_authenticated/slots'
+import { Route as AuthenticatedBookAreaIdRouteImport } from './routes/_authenticated/book.$areaId'
 import { Route as ApiPublicDetectionDetectRouteImport } from './routes/api/public/detection/detect'
 import { Route as ApiPublicDetectionHealthRouteImport } from './routes/api/public/detection/health'
 
@@ -79,6 +81,11 @@ const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -87,6 +94,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSlotsRoute = AuthenticatedSlotsRouteImport.update({
   id: '/slots',
   path: '/slots',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBookAreaIdRoute = AuthenticatedBookAreaIdRouteImport.update({
+  id: '/book/$areaId',
+  path: '/book/$areaId',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicDetectionDetectRoute =
@@ -113,8 +125,10 @@ export interface FileRoutesByFullPath {
   '/live': typeof AuthenticatedLiveRoute
   '/prediction': typeof AuthenticatedPredictionRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/slots': typeof AuthenticatedSlotsRoute
+  '/book/$areaId': typeof AuthenticatedBookAreaIdRoute
   '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
   '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
@@ -129,8 +143,10 @@ export interface FileRoutesByTo {
   '/live': typeof AuthenticatedLiveRoute
   '/prediction': typeof AuthenticatedPredictionRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/slots': typeof AuthenticatedSlotsRoute
+  '/book/$areaId': typeof AuthenticatedBookAreaIdRoute
   '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
   '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
@@ -147,8 +163,10 @@ export interface FileRoutesById {
   '/_authenticated/live': typeof AuthenticatedLiveRoute
   '/_authenticated/prediction': typeof AuthenticatedPredictionRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/slots': typeof AuthenticatedSlotsRoute
+  '/_authenticated/book/$areaId': typeof AuthenticatedBookAreaIdRoute
   '/api/public/detection/detect': typeof ApiPublicDetectionDetectRoute
   '/api/public/detection/health': typeof ApiPublicDetectionHealthRoute
 }
@@ -165,8 +183,10 @@ export interface FileRouteTypes {
     | '/live'
     | '/prediction'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/slots'
+    | '/book/$areaId'
     | '/api/public/detection/detect'
     | '/api/public/detection/health'
   fileRoutesByTo: FileRoutesByTo
@@ -181,8 +201,10 @@ export interface FileRouteTypes {
     | '/live'
     | '/prediction'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/slots'
+    | '/book/$areaId'
     | '/api/public/detection/detect'
     | '/api/public/detection/health'
   id:
@@ -198,8 +220,10 @@ export interface FileRouteTypes {
     | '/_authenticated/live'
     | '/_authenticated/prediction'
     | '/_authenticated/reports'
+    | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/slots'
+    | '/_authenticated/book/$areaId'
     | '/api/public/detection/detect'
     | '/api/public/detection/health'
   fileRoutesById: FileRoutesById
@@ -293,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/search': {
+      id: '/_authenticated/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -305,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/slots'
       fullPath: '/slots'
       preLoaderRoute: typeof AuthenticatedSlotsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/book/$areaId': {
+      id: '/_authenticated/book/$areaId'
+      path: '/book/$areaId'
+      fullPath: '/book/$areaId'
+      preLoaderRoute: typeof AuthenticatedBookAreaIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/detection/detect': {
@@ -331,8 +369,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLiveRoute: typeof AuthenticatedLiveRoute
   AuthenticatedPredictionRoute: typeof AuthenticatedPredictionRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSlotsRoute: typeof AuthenticatedSlotsRoute
+  AuthenticatedBookAreaIdRoute: typeof AuthenticatedBookAreaIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -342,8 +382,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLiveRoute: AuthenticatedLiveRoute,
   AuthenticatedPredictionRoute: AuthenticatedPredictionRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSlotsRoute: AuthenticatedSlotsRoute,
+  AuthenticatedBookAreaIdRoute: AuthenticatedBookAreaIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
