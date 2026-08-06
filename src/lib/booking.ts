@@ -208,7 +208,7 @@ export function useFavorites(userId: string | undefined) {
 export function useToggleFavorite(userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ areaId, existingId }: { areaId: string; existingId?: string }) => {
+    mutationFn: async ({ areaId, existingId }: { areaId: string; existingId?: string | undefined }) => {
       if (existingId) {
         const { error } = await supabase.from("favorites").delete().eq("id", existingId);
         if (error) throw error;
