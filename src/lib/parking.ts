@@ -1,4 +1,4 @@
-export type SlotStatus = "available" | "occupied" | "unknown";
+export type SlotStatus = "available" | "occupied" | "reserved" | "offline" | "unknown";
 
 export type ParkingArea = {
   id: string;
