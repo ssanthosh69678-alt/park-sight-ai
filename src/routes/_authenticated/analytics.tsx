@@ -163,35 +163,36 @@ function AnalyticsPage() {
 
   /** Vehicle growth — bookings per vehicle type across the selected range. */
   const vehicleGrowth = useMemo(() => {
+    type Row = { label: string; order: number; bike: number; car: number; suv: number; truck: number };
+    const buckets = new Map<string, Row>();
     const list = (bookings.data ?? []).filter((b) => new Date(b.start_time).getTime() >= since);
-    const buckets = new Map<string, Record<string, number> & { label: string; order: number }>();
     for (const b of list) {
       const d = new Date(b.start_time);
       const key = bucketKey(d, range);
-      const row =
-        buckets.get(key) ??
-        ({ label: key, order: d.getTime(), bike: 0, car: 0, suv: 0, truck: 0 } as Record<string, number> & {
-          label: string;
-          order: number;
-        });
-      const type = ["bike", "car", "suv", "truck"].includes(b.vehicle_type) ? b.vehicle_type : "car";
-      row[type] = (row[type] ?? 0) + 1;
+      const row: Row = buckets.get(key) ?? {
+        label: key,
+        order: d.getTime(),
+        bike: 0,
+        car: 0,
+        suv: 0,
+        truck: 0,
+      };
+      const type = (["bike", "car", "suv", "truck"] as const).find((t) => t === b.vehicle_type) ?? "car";
+      row[type] += 1;
       row.order = Math.min(row.order, d.getTime());
       buckets.set(key, row);
     }
     return [...buckets.values()].sort((a, b) => a.order - b.order);
   }, [bookings.data, since, range]);
 
-  const totalVehicles = vehicleGrowth.reduce(
-    (sum, row) => sum + row.bike! + row.car! + row.suv! + row.truck!,
-    0,
-  );
+  const count = (rows: typeof vehicleGrowth) =>
+    rows.reduce((s, r) => s + r.bike + r.car + r.suv + r.truck, 0);
+  const totalVehicles = count(vehicleGrowth);
   const firstHalf = vehicleGrowth.slice(0, Math.floor(vehicleGrowth.length / 2));
   const secondHalf = vehicleGrowth.slice(Math.floor(vehicleGrowth.length / 2));
-  const count = (rows: typeof vehicleGrowth) =>
-    rows.reduce((s, r) => s + r.bike! + r.car! + r.suv! + r.truck!, 0);
   const growthPct =
     count(firstHalf) > 0 ? Math.round(((count(secondHalf) - count(firstHalf)) / count(firstHalf)) * 100) : 0;
+
 
   const values = inRange.map((r) => r.occupancy_percentage);
   const utilization = Math.round(mean(values));
