@@ -339,7 +339,7 @@ function AnalyticsPage() {
                     name={v.label}
                     stackId="vehicles"
                     fill={`var(--color-chart-${i + 1})`}
-                    radius={i === VEHICLE_TYPES.length - 1 ? [6, 6, 0, 0] : undefined}
+                    radius={i === VEHICLE_TYPES.length - 1 ? [6, 6, 0, 0] : 0}
                   />
                 ))}
               </BarChart>
