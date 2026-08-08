@@ -336,8 +336,9 @@
   height: 2px;
   width: 140px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.9));
-  filter: drop-shadow(0 0 6px oklch(0.85 0.12 250 / 0.8));
+  background: linear-gradient(90deg, transparent, var(--space-shoot));
+  filter: drop-shadow(0 0 6px var(--space-shoot));
+
   opacity: 0;
   animation: shoot 9s ease-in infinite;
 }
