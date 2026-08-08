@@ -210,7 +210,12 @@
   }
 }
 
+@utility app-header {
+  background-color: color-mix(in oklab, var(--card) 88%, var(--background));
+}
+
 @utility surface-card {
+
   background-color: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);

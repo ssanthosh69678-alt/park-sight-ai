@@ -268,12 +268,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur">
+        <header className="app-header sticky top-0 z-40 flex h-16 items-center gap-3 border-b px-4 backdrop-blur-xl">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu">
+              <Button variant="outline" size="icon" className="border-border bg-card text-foreground shadow-sm lg:hidden" aria-label="Open menu">
                 <Menu className="size-5" />
               </Button>
+
             </SheetTrigger>
             <SheetContent side="left" className="w-64 bg-sidebar p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
