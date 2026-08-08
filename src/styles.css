@@ -370,8 +370,9 @@
 }
 
 .space-vignette {
-  background: radial-gradient(120% 90% at 50% 0%, transparent 40%, oklch(0.08 0.02 268 / 0.75) 100%);
+  background: var(--space-vignette);
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .space-nebula,
