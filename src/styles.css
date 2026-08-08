@@ -104,8 +104,36 @@
   --shadow-glow: 0 0 0 1px oklch(0.52 0.21 268 / 0.16), 0 18px 50px -20px oklch(0.52 0.21 268 / 0.45);
 }
 
+/* Light-mode cosmos tokens: a genuinely bright interface that still shows the universe. */
+:root {
+  --space-base: oklch(0.97 0.018 262);
+  --space-nebula-1: oklch(0.72 0.13 285 / 0.3);
+  --space-nebula-2: oklch(0.78 0.1 215 / 0.28);
+  --space-nebula-3: oklch(0.75 0.12 330 / 0.22);
+  --space-nebula-4: oklch(0.8 0.09 190 / 0.2);
+  --space-star: oklch(0.45 0.16 275 / 0.75);
+  --space-star-alt: oklch(0.55 0.15 225 / 0.7);
+  --space-star-faint: oklch(0.6 0.12 320 / 0.5);
+  --space-shoot: oklch(0.5 0.18 270 / 0.85);
+  --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 45%, oklch(0.72 0.06 262 / 0.35) 100%);
+  /* translucent surfaces so the backdrop reads through in light mode too */
+  --background: oklch(0.99 0.004 260 / 0.6);
+  --card: oklch(1 0 0 / 0.72);
+  --sidebar: oklch(1 0 0 / 0.66);
+}
+
 .dark {
   --space-base: oklch(0.11 0.03 268);
+  --space-nebula-1: oklch(0.55 0.22 285 / 0.42);
+  --space-nebula-2: oklch(0.6 0.18 215 / 0.34);
+  --space-nebula-3: oklch(0.5 0.2 330 / 0.28);
+  --space-nebula-4: oklch(0.58 0.16 190 / 0.22);
+  --space-star: oklch(1 0 0 / 0.95);
+  --space-star-alt: oklch(0.9 0.05 250 / 0.85);
+  --space-star-faint: oklch(0.95 0.04 300 / 0.7);
+  --space-shoot: oklch(1 0 0 / 0.9);
+  --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 40%, oklch(0.08 0.02 268 / 0.75) 100%);
+
   --background: oklch(0.17 0.028 264 / 0.55);
   --foreground: oklch(0.97 0.006 258);
   --card: oklch(0.215 0.031 265 / 0.72);
