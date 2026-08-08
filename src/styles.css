@@ -104,8 +104,36 @@
   --shadow-glow: 0 0 0 1px oklch(0.52 0.21 268 / 0.16), 0 18px 50px -20px oklch(0.52 0.21 268 / 0.45);
 }
 
+/* Light-mode cosmos tokens: a genuinely bright interface that still shows the universe. */
+:root {
+  --space-base: oklch(0.97 0.018 262);
+  --space-nebula-1: oklch(0.7 0.16 285 / 0.45);
+  --space-nebula-2: oklch(0.76 0.13 215 / 0.42);
+  --space-nebula-3: oklch(0.74 0.14 330 / 0.34);
+  --space-nebula-4: oklch(0.78 0.11 190 / 0.3);
+  --space-star: oklch(0.34 0.19 275);
+  --space-star-alt: oklch(0.42 0.18 225);
+  --space-star-faint: oklch(0.5 0.16 320 / 0.85);
+  --space-shoot: oklch(0.5 0.18 270 / 0.85);
+  --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 45%, oklch(0.72 0.06 262 / 0.35) 100%);
+  /* translucent surfaces so the backdrop reads through in light mode too */
+  --background: oklch(0.99 0.004 260 / 0.42);
+  --card: oklch(1 0 0 / 0.72);
+  --sidebar: oklch(1 0 0 / 0.66);
+}
+
 .dark {
   --space-base: oklch(0.11 0.03 268);
+  --space-nebula-1: oklch(0.55 0.22 285 / 0.42);
+  --space-nebula-2: oklch(0.6 0.18 215 / 0.34);
+  --space-nebula-3: oklch(0.5 0.2 330 / 0.28);
+  --space-nebula-4: oklch(0.58 0.16 190 / 0.22);
+  --space-star: oklch(1 0 0 / 0.95);
+  --space-star-alt: oklch(0.9 0.05 250 / 0.85);
+  --space-star-faint: oklch(0.95 0.04 300 / 0.7);
+  --space-shoot: oklch(1 0 0 / 0.9);
+  --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 40%, oklch(0.08 0.02 268 / 0.75) 100%);
+
   --background: oklch(0.17 0.028 264 / 0.55);
   --foreground: oklch(0.97 0.006 258);
   --card: oklch(0.215 0.031 265 / 0.72);
@@ -168,10 +196,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .dark .surface-card,
-  .dark [data-slot="card"] {
+  .surface-card,
+  [data-slot="card"] {
     backdrop-filter: blur(14px) saturate(140%);
   }
+
 
 
   h1,
@@ -219,10 +248,10 @@
 
 .space-nebula {
   background-image:
-    radial-gradient(60% 45% at 18% 12%, oklch(0.55 0.22 285 / 0.42), transparent 70%),
-    radial-gradient(55% 40% at 84% 22%, oklch(0.6 0.18 215 / 0.34), transparent 72%),
-    radial-gradient(70% 50% at 62% 88%, oklch(0.5 0.2 330 / 0.28), transparent 72%),
-    radial-gradient(45% 35% at 8% 78%, oklch(0.58 0.16 190 / 0.22), transparent 70%);
+    radial-gradient(60% 45% at 18% 12%, var(--space-nebula-1), transparent 70%),
+    radial-gradient(55% 40% at 84% 22%, var(--space-nebula-2), transparent 72%),
+    radial-gradient(70% 50% at 62% 88%, var(--space-nebula-3), transparent 72%),
+    radial-gradient(45% 35% at 8% 78%, var(--space-nebula-4), transparent 70%);
   filter: blur(6px);
   animation: nebula-drift 40s ease-in-out infinite alternate;
 }
@@ -245,31 +274,51 @@
 
 .space-stars-1 {
   background-image:
-    radial-gradient(1.6px 1.6px at 20px 30px, oklch(1 0 0 / 0.95), transparent),
-    radial-gradient(1.4px 1.4px at 140px 90px, oklch(0.9 0.05 250 / 0.85), transparent),
-    radial-gradient(1.8px 1.8px at 260px 40px, oklch(1 0 0 / 0.8), transparent),
-    radial-gradient(1.2px 1.2px at 80px 200px, oklch(0.95 0.04 300 / 0.8), transparent);
-  background-size: 320px 260px;
+    radial-gradient(2px 2px at 20px 30px, var(--space-star), transparent),
+    radial-gradient(1.8px 1.8px at 140px 90px, var(--space-star-alt), transparent),
+    radial-gradient(2.2px 2.2px at 260px 40px, var(--space-star), transparent),
+    radial-gradient(1.6px 1.6px at 80px 200px, var(--space-star-faint), transparent),
+    radial-gradient(1.7px 1.7px at 300px 170px, var(--space-star-alt), transparent),
+    radial-gradient(2px 2px at 190px 230px, var(--space-star), transparent),
+    radial-gradient(1.5px 1.5px at 40px 130px, var(--space-star-faint), transparent),
+    radial-gradient(1.9px 1.9px at 230px 120px, var(--space-star-alt), transparent);
+  background-size: 190px 160px;
   animation: star-drift 140s linear infinite, star-twinkle 5s ease-in-out infinite;
 }
 
 .space-stars-2 {
   background-image:
-    radial-gradient(1.1px 1.1px at 60px 60px, oklch(1 0 0 / 0.7), transparent),
-    radial-gradient(1px 1px at 200px 150px, oklch(0.88 0.07 220 / 0.7), transparent),
-    radial-gradient(1.3px 1.3px at 320px 240px, oklch(1 0 0 / 0.6), transparent);
-  background-size: 420px 340px;
+    radial-gradient(1.5px 1.5px at 60px 60px, var(--space-star), transparent),
+    radial-gradient(1.3px 1.3px at 200px 150px, var(--space-star-alt), transparent),
+    radial-gradient(1.6px 1.6px at 320px 240px, var(--space-star-faint), transparent),
+    radial-gradient(1.4px 1.4px at 120px 300px, var(--space-star), transparent),
+    radial-gradient(1.2px 1.2px at 380px 80px, var(--space-star-alt), transparent),
+    radial-gradient(1.5px 1.5px at 260px 20px, var(--space-star-faint), transparent);
+  background-size: 250px 210px;
   animation: star-drift 220s linear infinite reverse, star-twinkle 7s ease-in-out infinite 1s;
 }
 
 .space-stars-3 {
   background-image:
-    radial-gradient(0.9px 0.9px at 30px 120px, oklch(1 0 0 / 0.5), transparent),
-    radial-gradient(0.8px 0.8px at 250px 60px, oklch(0.9 0.06 320 / 0.5), transparent);
-  background-size: 260px 220px;
+    radial-gradient(1.2px 1.2px at 30px 120px, var(--space-star-alt), transparent),
+    radial-gradient(1.1px 1.1px at 250px 60px, var(--space-star-faint), transparent),
+    radial-gradient(1.3px 1.3px at 150px 190px, var(--space-star), transparent),
+    radial-gradient(1px 1px at 90px 40px, var(--space-star-alt), transparent);
+  background-size: 170px 150px;
   animation: star-drift 320s linear infinite;
-  opacity: 0.7;
+  opacity: 0.8;
 }
+
+/* Fewer, calmer layers on small screens for smooth mobile performance. */
+@media (max-width: 640px) {
+  .space-stars-3 {
+    display: none;
+  }
+  .space-nebula {
+    filter: blur(10px);
+  }
+}
+
 
 @keyframes star-drift {
   from {
@@ -297,8 +346,9 @@
   height: 2px;
   width: 140px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.9));
-  filter: drop-shadow(0 0 6px oklch(0.85 0.12 250 / 0.8));
+  background: linear-gradient(90deg, transparent, var(--space-shoot));
+  filter: drop-shadow(0 0 6px var(--space-shoot));
+
   opacity: 0;
   animation: shoot 9s ease-in infinite;
 }
@@ -330,8 +380,9 @@
 }
 
 .space-vignette {
-  background: radial-gradient(120% 90% at 50% 0%, transparent 40%, oklch(0.08 0.02 268 / 0.75) 100%);
+  background: var(--space-vignette);
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .space-nebula,
