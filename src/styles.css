@@ -111,13 +111,13 @@
   --space-nebula-2: oklch(0.76 0.13 215 / 0.42);
   --space-nebula-3: oklch(0.74 0.14 330 / 0.34);
   --space-nebula-4: oklch(0.78 0.11 190 / 0.3);
-  --space-star: oklch(0.38 0.18 275 / 0.9);
-  --space-star-alt: oklch(0.46 0.17 225 / 0.85);
-  --space-star-faint: oklch(0.52 0.14 320 / 0.65);
+  --space-star: oklch(0.34 0.19 275);
+  --space-star-alt: oklch(0.42 0.18 225);
+  --space-star-faint: oklch(0.5 0.16 320 / 0.85);
   --space-shoot: oklch(0.5 0.18 270 / 0.85);
   --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 45%, oklch(0.72 0.06 262 / 0.35) 100%);
   /* translucent surfaces so the backdrop reads through in light mode too */
-  --background: oklch(0.99 0.004 260 / 0.6);
+  --background: oklch(0.99 0.004 260 / 0.42);
   --card: oklch(1 0 0 / 0.72);
   --sidebar: oklch(1 0 0 / 0.66);
 }
