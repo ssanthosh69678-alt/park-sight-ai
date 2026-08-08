@@ -196,10 +196,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .dark .surface-card,
-  .dark [data-slot="card"] {
+  .surface-card,
+  [data-slot="card"] {
     backdrop-filter: blur(14px) saturate(140%);
   }
+
 
 
   h1,
