@@ -107,13 +107,13 @@
 /* Light-mode cosmos tokens: a genuinely bright interface that still shows the universe. */
 :root {
   --space-base: oklch(0.97 0.018 262);
-  --space-nebula-1: oklch(0.72 0.13 285 / 0.3);
-  --space-nebula-2: oklch(0.78 0.1 215 / 0.28);
-  --space-nebula-3: oklch(0.75 0.12 330 / 0.22);
-  --space-nebula-4: oklch(0.8 0.09 190 / 0.2);
-  --space-star: oklch(0.45 0.16 275 / 0.75);
-  --space-star-alt: oklch(0.55 0.15 225 / 0.7);
-  --space-star-faint: oklch(0.6 0.12 320 / 0.5);
+  --space-nebula-1: oklch(0.7 0.16 285 / 0.45);
+  --space-nebula-2: oklch(0.76 0.13 215 / 0.42);
+  --space-nebula-3: oklch(0.74 0.14 330 / 0.34);
+  --space-nebula-4: oklch(0.78 0.11 190 / 0.3);
+  --space-star: oklch(0.38 0.18 275 / 0.9);
+  --space-star-alt: oklch(0.46 0.17 225 / 0.85);
+  --space-star-faint: oklch(0.52 0.14 320 / 0.65);
   --space-shoot: oklch(0.5 0.18 270 / 0.85);
   --space-vignette: radial-gradient(120% 90% at 50% 0%, transparent 45%, oklch(0.72 0.06 262 / 0.35) 100%);
   /* translucent surfaces so the backdrop reads through in light mode too */
