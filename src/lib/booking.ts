@@ -1,14 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ParkingArea } from "./parking";
+import type { ParkingArea, VehicleType } from "./parking";
 
-export type VehicleType = "bike" | "car" | "suv" | "truck";
+export type { VehicleType } from "./parking";
 
 export const VEHICLE_TYPES: { value: VehicleType; label: string }[] = [
-  { value: "bike", label: "Bike / Scooter" },
   { value: "car", label: "Car" },
-  { value: "suv", label: "SUV" },
-  { value: "truck", label: "Truck" },
+  { value: "bike", label: "Bike / Scooter" },
 ];
 
 export type BookingStatus =
@@ -62,18 +60,24 @@ export type Payment = {
 };
 
 /** Hourly rate for a vehicle type, falling back to the generic hourly price. */
-export function rateFor(area: Pick<ParkingArea, "id"> & Record<string, unknown>, vehicle: VehicleType) {
+export function rateFor(
+  area: Pick<ParkingArea, "id"> & Record<string, unknown>,
+  vehicle: VehicleType,
+) {
   const key = `price_${vehicle}` as const;
   const specific = Number(area[key] ?? 0);
   if (specific > 0) return specific;
   return Number(area["price_hourly"] ?? 0);
 }
 
-export function quote(area: Record<string, unknown>, vehicle: VehicleType, hours: number) {
+export function quote(
+  area: Record<string, unknown>,
+  vehicle: VehicleType,
+  hours: number,
+) {
   const hourly = rateFor(area as never, vehicle);
   const daily = Number(area["price_daily"] ?? 0);
   const byHour = hourly * hours;
-  // A full day never costs more than the daily cap.
   const days = Math.floor(hours / 24);
   const capped = daily > 0 ? days * daily + rateFor(area as never, vehicle) * (hours % 24) : byHour;
   return Math.round(Math.min(byHour, capped || byHour) * 100) / 100;
@@ -103,36 +107,40 @@ export function useMyBookings(userId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bookings")
-        .select("*, parking_areas(area_name, address, location)")
+        .select("*, parking_areas(area_name, address, location, city)")
         .eq("customer_id", userId!)
         .order("start_time", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as (Booking & {
-        parking_areas: { area_name: string; address: string; location: string } | null;
+        parking_areas: { area_name: string; address: string; location: string; city: string } | null;
       })[];
     },
   });
 }
 
+/**
+ * Creates a booking via the server-side `create_booking` RPC function.
+ * The amount is computed by the database — never trusted from the client.
+ */
 export function useCreateBooking() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: {
-      customer_id: string;
       area_id: string;
-      slot_id?: string | null;
+      slot_id: string;
       vehicle_type: VehicleType;
       vehicle_number: string;
       start_time: string;
       end_time: string;
-      hours: number;
-      amount: number;
     }) => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .insert({ ...input, status: "pending", payment_status: "unpaid" })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc("create_booking", {
+        p_area_id: input.area_id,
+        p_slot_id: input.slot_id,
+        p_vehicle_type: input.vehicle_type,
+        p_vehicle_number: input.vehicle_number,
+        p_start_time: input.start_time,
+        p_end_time: input.end_time,
+      });
       if (error) throw error;
       return data as unknown as Booking;
     },
@@ -140,53 +148,31 @@ export function useCreateBooking() {
   });
 }
 
+/**
+ * Confirms a demo payment via the server-side `confirm_demo_payment` RPC.
+ * This is clearly a demo — no real payment gateway is involved.
+ */
 export function usePayForBooking() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: {
-      booking: Booking;
-      method: PaymentMethod;
-    }) => {
-      const { booking, method } = input;
-      const { data, error } = await supabase
-        .from("payments")
-        .insert({
-          booking_id: booking.id,
-          customer_id: booking.customer_id,
-          area_id: booking.area_id,
-          amount: booking.amount,
-          method,
-          status: "paid",
-          paid_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      if (error) throw error;
-
-      const { error: upErr } = await supabase
-        .from("bookings")
-        .update({ payment_status: "paid", status: "confirmed" })
-        .eq("id", booking.id);
-      if (upErr) throw upErr;
-
-      await supabase.from("notifications").insert({
-        user_id: booking.customer_id,
-        title: "Booking confirmed",
-        message: `Booking ${booking.booking_ref} is confirmed and paid.`,
-        type: "booking",
+    mutationFn: async (input: { booking: Booking; method: PaymentMethod }) => {
+      const { data, error } = await supabase.rpc("confirm_demo_payment", {
+        p_booking_id: input.booking.id,
+        p_method: input.method,
       });
-
+      if (error) throw error;
       return data as unknown as Payment;
     },
     onSuccess: () => qc.invalidateQueries(),
   });
 }
 
+/** Cancels a booking via the server-side `cancel_booking` RPC. */
 export function useCancelBooking() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("bookings").update({ status: "cancelled" }).eq("id", id);
+      const { error } = await supabase.rpc("cancel_booking", { p_booking_id: id });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries(),
@@ -221,6 +207,30 @@ export function useToggleFavorite(userId: string | undefined) {
   });
 }
 
+export function useNotifications(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["notifications", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId!)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data ?? []) as {
+        id: string;
+        title: string;
+        message: string;
+        type: string;
+        is_read: boolean;
+        created_at: string;
+      }[];
+    },
+  });
+}
+
 /* ---------------- Owner-facing ---------------- */
 
 export function useOwnerBookings(areaIds: string[]) {
@@ -230,11 +240,13 @@ export function useOwnerBookings(areaIds: string[]) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bookings")
-        .select("*")
+        .select("*, parking_slots(slot_number)")
         .in("area_id", areaIds)
         .order("start_time", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as unknown as Booking[];
+      return (data ?? []) as unknown as (Booking & {
+        parking_slots: { slot_number: string } | null;
+      })[];
     },
   });
 }
@@ -285,4 +297,13 @@ export function isToday(iso: string) {
   const d = new Date(iso);
   const now = new Date();
   return d.toDateString() === now.toDateString();
+}
+
+export function isUpcoming(iso: string) {
+  return new Date(iso).getTime() > Date.now();
+}
+
+export function isActive(startIso: string, endIso: string) {
+  const now = Date.now();
+  return new Date(startIso).getTime() <= now && new Date(endIso).getTime() > now;
 }

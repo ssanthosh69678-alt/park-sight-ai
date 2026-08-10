@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
-import { CalendarClock, CheckCircle2, CreditCard, Loader2, MapPin } from "lucide-react";
+import { CalendarClock, CircleCheck as CheckCircle2, CreditCard, Loader as Loader2, MapPin } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import {
   PAYMENT_METHODS,
   VEHICLE_TYPES,
@@ -27,7 +26,7 @@ import type { ParkingArea, ParkingSlot } from "@/lib/parking";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/book/$areaId")({
-  validateSearch: z.object({ vehicle: z.enum(["bike", "car", "suv", "truck"]).optional() }),
+  validateSearch: z.object({ vehicle: z.enum(["bike", "car"]).optional() }),
   head: () => ({
     meta: [
       { title: "Book parking — ParkSight AI" },
@@ -49,7 +48,6 @@ function toLocalInput(d: Date) {
 function BookPage() {
   const { areaId } = Route.useParams();
   const search = Route.useSearch();
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -104,7 +102,10 @@ function BookPage() {
   const bookable = (slotsQuery.data ?? []).filter((s) => s.status === "available" || s.status === "unknown");
 
   async function confirmBooking() {
-    if (!user) return;
+    if (!slotId) {
+      toast.error("Select a slot first");
+      return;
+    }
     if (plate.trim().length < 3) {
       toast.error("Enter your vehicle number");
       return;
@@ -117,15 +118,12 @@ function BookPage() {
     const endDate = new Date(startDate.getTime() + hours * 3600 * 1000);
     try {
       const created = await createBooking.mutateAsync({
-        customer_id: user.id,
         area_id: areaId,
         slot_id: slotId,
         vehicle_type: vehicle,
         vehicle_number: plate.trim().toUpperCase(),
         start_time: startDate.toISOString(),
         end_time: endDate.toISOString(),
-        hours,
-        amount,
       });
       setBooking(created);
       setStep(2);
@@ -138,9 +136,6 @@ function BookPage() {
     if (!booking) return;
     try {
       await pay.mutateAsync({ booking, method });
-      if (booking.slot_id) {
-        await supabase.from("parking_slots").update({ status: "reserved" }).eq("id", booking.slot_id);
-      }
       setStep(3);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Payment failed");
@@ -257,9 +252,10 @@ function BookPage() {
 
           {step === 2 && booking && (
             <>
-              <h2 className="font-semibold">Payment</h2>
+              <h2 className="font-semibold">Demo Payment</h2>
               <p className="text-xs text-muted-foreground">
                 Booking <span className="font-mono">{booking.booking_ref}</span> is held until payment completes.
+                This is a clearly labelled demo payment — no real money is charged.
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {PAYMENT_METHODS.map((m) => (

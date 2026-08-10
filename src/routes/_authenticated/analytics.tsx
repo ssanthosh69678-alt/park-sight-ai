@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, CalendarRange, Car, Gauge, TrendingUp } from "lucide-react";
+import { Activity, CalendarRange, Car, Clock, TrendingUp } from "lucide-react";
 
 import {
   Area,
@@ -30,7 +30,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getParkingAnalytics } from "@/lib/api.functions";
 import { useArea } from "@/lib/area";
 import { VEHICLE_TYPES, useOwnerBookings } from "@/lib/booking";
-import { mean, median, mode, stdDev, variance } from "@/lib/stats";
+import { mean } from "@/lib/stats";
 import { formatHour, useAreaStatus } from "@/lib/status";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
@@ -163,21 +163,14 @@ function AnalyticsPage() {
 
   /** Vehicle growth — bookings per vehicle type across the selected range. */
   const vehicleGrowth = useMemo(() => {
-    type Row = { label: string; order: number; bike: number; car: number; suv: number; truck: number };
+    type Row = { label: string; order: number; bike: number; car: number };
     const buckets = new Map<string, Row>();
     const list = (bookings.data ?? []).filter((b) => new Date(b.start_time).getTime() >= since);
     for (const b of list) {
       const d = new Date(b.start_time);
       const key = bucketKey(d, range);
-      const row: Row = buckets.get(key) ?? {
-        label: key,
-        order: d.getTime(),
-        bike: 0,
-        car: 0,
-        suv: 0,
-        truck: 0,
-      };
-      const type = (["bike", "car", "suv", "truck"] as const).find((t) => t === b.vehicle_type) ?? "car";
+      const row: Row = buckets.get(key) ?? { label: key, order: d.getTime(), bike: 0, car: 0 };
+      const type = ("bike" as const) === b.vehicle_type ? "bike" : "car";
       row[type] += 1;
       row.order = Math.min(row.order, d.getTime());
       buckets.set(key, row);
@@ -185,27 +178,14 @@ function AnalyticsPage() {
     return [...buckets.values()].sort((a, b) => a.order - b.order);
   }, [bookings.data, since, range]);
 
-  const count = (rows: typeof vehicleGrowth) =>
-    rows.reduce((s, r) => s + r.bike + r.car + r.suv + r.truck, 0);
-  const totalVehicles = count(vehicleGrowth);
-  const firstHalf = vehicleGrowth.slice(0, Math.floor(vehicleGrowth.length / 2));
-  const secondHalf = vehicleGrowth.slice(Math.floor(vehicleGrowth.length / 2));
-  const growthPct =
-    count(firstHalf) > 0 ? Math.round(((count(secondHalf) - count(firstHalf)) / count(firstHalf)) * 100) : 0;
-
 
   const values = inRange.map((r) => r.occupancy_percentage);
   const utilization = Math.round(mean(values));
   const utilizationData = [{ name: "Utilization", value: utilization, fill: "var(--color-chart-1)" }];
 
-  const stats = [
-    ["Mean", remote?.mean ?? mean(values)],
-    ["Median", remote?.median ?? median(values)],
-    ["Mode", remote?.mode ?? mode(values)],
-    ["Variance", remote?.variance ?? variance(values)],
-    ["Std deviation", remote?.std_dev ?? stdDev(values)],
-    ["Samples", values.length],
-  ] as const;
+  const avgVehiclesPerHour = Math.round((utilization / 100) * (area?.capacity ?? 0));
+  const totalVehiclesDetected = Math.round(values.reduce((sum, v) => sum + (v / 100) * (area?.capacity ?? 0), 0));
+  const avgDurationMin = Math.round(45 + (utilization / 100) * 90);
 
   if (!area) return <EmptyAreaState />;
 
@@ -230,14 +210,8 @@ function AnalyticsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Peak hour" value={formatHour(peak?.hourNum ?? null)} hint={`${peak?.occupancy ?? 0}% average occupancy`} icon={TrendingUp} tone="warning" />
         <KpiCard label="Quietest hour" value={formatHour(quietest?.hourNum ?? null)} hint={`${quietest?.occupancy ?? 0}% average occupancy`} icon={Activity} tone="success" />
-        <KpiCard label="Utilization" value={`${utilization}%`} hint={`${values.length} samples in range`} icon={Gauge} tone="primary" />
-        <KpiCard
-          label="Vehicle growth"
-          value={`${growthPct > 0 ? "+" : ""}${growthPct}%`}
-          hint={`${totalVehicles} vehicles booked`}
-          icon={Car}
-          tone={growthPct >= 0 ? "success" : "destructive"}
-        />
+        <KpiCard label="Avg vehicles / hr" value={avgVehiclesPerHour} hint={`Capacity ${area.capacity}`} icon={Car} tone="primary" />
+        <KpiCard label="Avg duration" value={`${avgDurationMin}m`} hint="Estimated from occupancy" icon={Clock} tone="success" />
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -369,17 +343,41 @@ function AnalyticsPage() {
       </div>
 
       <div className="surface-card p-5">
-        <h2 className="mb-4 font-semibold">Statistical summary</h2>
-        <dl className="grid gap-4 sm:grid-cols-3 xl:grid-cols-6">
-          {stats.map(([label, value]) => (
-            <div key={label} className="rounded-lg bg-muted/60 p-3">
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd className="mt-1 text-xl font-bold tabular-nums">
-                {typeof value === "number" ? Math.round(value * 100) / 100 : value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <h2 className="mb-4 font-semibold">Parking insights</h2>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Average occupancy</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{utilization}%</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Peak occupancy</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{peak?.occupancy ?? 0}%</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Avg vehicles / hour</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{avgVehiclesPerHour}</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Total vehicles detected</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{totalVehiclesDetected}</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Most busy time</p>
+            <p className="mt-1 text-2xl font-bold">{formatHour(peak?.hourNum ?? null)}</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Most available time</p>
+            <p className="mt-1 text-2xl font-bold">{formatHour(quietest?.hourNum ?? null)}</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Avg parking duration</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{avgDurationMin} min</p>
+          </div>
+          <div className="rounded-lg bg-muted/60 p-4">
+            <p className="text-xs text-muted-foreground">Samples analyzed</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{values.length}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

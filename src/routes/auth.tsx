@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Building2, Car, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Building2, Car, Eye, EyeOff, Loader as Loader2 } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,9 @@ function AuthPage() {
   const [tab, setTab] = useState(mode === "login" ? "login" : mode ? "signup" : "login");
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/dashboard", replace: true });
+    if (!loading && user) {
+      routeForCurrentUser().then((to) => navigate({ to, replace: true }));
+    }
   }, [user, loading, navigate]);
 
   return (

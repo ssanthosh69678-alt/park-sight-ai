@@ -226,8 +226,11 @@ export type Database = {
           address: string
           area_name: string
           camera_image_url: string | null
+          camera_stream_url: string | null
           capacity: number
+          city: string
           closing_time: string
+          contact_number: string | null
           created_at: string
           demo_mode: boolean
           description: string | null
@@ -237,7 +240,9 @@ export type Database = {
           location: string
           longitude: number | null
           opening_time: string
+          parking_rules: string | null
           parking_type: string
+          postal_code: string
           price_bike: number
           price_car: number
           price_daily: number
@@ -245,6 +250,7 @@ export type Database = {
           price_suv: number
           price_truck: number
           rating: number
+          state: string
           updated_at: string
           user_id: string
           vehicle_types: string[]
@@ -253,8 +259,11 @@ export type Database = {
           address?: string
           area_name: string
           camera_image_url?: string | null
+          camera_stream_url?: string | null
           capacity?: number
+          city?: string
           closing_time?: string
+          contact_number?: string | null
           created_at?: string
           demo_mode?: boolean
           description?: string | null
@@ -264,7 +273,9 @@ export type Database = {
           location?: string
           longitude?: number | null
           opening_time?: string
+          parking_rules?: string | null
           parking_type?: string
+          postal_code?: string
           price_bike?: number
           price_car?: number
           price_daily?: number
@@ -272,6 +283,7 @@ export type Database = {
           price_suv?: number
           price_truck?: number
           rating?: number
+          state?: string
           updated_at?: string
           user_id: string
           vehicle_types?: string[]
@@ -280,8 +292,11 @@ export type Database = {
           address?: string
           area_name?: string
           camera_image_url?: string | null
+          camera_stream_url?: string | null
           capacity?: number
+          city?: string
           closing_time?: string
+          contact_number?: string | null
           created_at?: string
           demo_mode?: boolean
           description?: string | null
@@ -291,7 +306,9 @@ export type Database = {
           location?: string
           longitude?: number | null
           opening_time?: string
+          parking_rules?: string | null
           parking_type?: string
+          postal_code?: string
           price_bike?: number
           price_car?: number
           price_daily?: number
@@ -299,6 +316,7 @@ export type Database = {
           price_suv?: number
           price_truck?: number
           rating?: number
+          state?: string
           updated_at?: string
           user_id?: string
           vehicle_types?: string[]
@@ -496,7 +514,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          business_name: string
           created_at: string
+          default_vehicle_number: string
           email: string
           full_name: string
           id: string
@@ -504,7 +524,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          business_name?: string
           created_at?: string
+          default_vehicle_number?: string
           email?: string
           full_name?: string
           id: string
@@ -512,7 +534,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          business_name?: string
           created_at?: string
+          default_vehicle_number?: string
           email?: string
           full_name?: string
           id?: string
@@ -611,6 +635,34 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      cancel_booking: {
+        Args: { p_booking_id: string }
+        Returns: undefined
+      }
+      compute_booking_amount: {
+        Args: {
+          p_area_id: string
+          p_vehicle_type: string
+          p_start_time: string
+          p_end_time: string
+        }
+        Returns: number
+      }
+      confirm_demo_payment: {
+        Args: { p_booking_id: string; p_method: string }
+        Returns: Database["public"]["Tables"]["payments"]["Row"]
+      }
+      create_booking: {
+        Args: {
+          p_area_id: string
+          p_slot_id: string
+          p_vehicle_type: string
+          p_vehicle_number: string
+          p_start_time: string
+          p_end_time: string
+        }
+        Returns: Database["public"]["Tables"]["bookings"]["Row"]
       }
     }
     Enums: {
